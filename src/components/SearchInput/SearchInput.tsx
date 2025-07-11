@@ -1,43 +1,22 @@
-import { Component, type ChangeEvent } from 'react';
+import { Component } from 'react';
 import styles from './searchInput.module.css';
 
 type SearchInputProps = {
-  placeholder?: string;
-  onSearch?: (query: string) => void;
+  inputValue: string;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-type SearchInputState = {
-  query: string;
-};
-
-export class SearchInput extends Component<SearchInputProps, SearchInputState> {
-  constructor(props: SearchInputProps) {
-    super(props);
-    this.state = {
-      query: '',
-    };
-  }
-
-  handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    this.setState({ query });
-
-    if (this.props.onSearch) {
-      this.props.onSearch(query);
-    }
-  };
-
+export class SearchInput extends Component<SearchInputProps> {
   render() {
-    const { placeholder = 'Search...' } = this.props;
-    const { query } = this.state;
+    const placeholder = 'Search...';
 
     return (
       <input
         type="search"
         className={styles.input}
         placeholder={placeholder}
-        value={query}
-        onChange={this.handleChange}
+        value={this.props.inputValue}
+        onChange={this.props.handleInputChange}
       />
     );
   }
