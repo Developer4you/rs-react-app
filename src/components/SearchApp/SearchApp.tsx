@@ -3,7 +3,12 @@ import styles from './searchApp.module.css';
 import Controls from '../controls/Controls';
 import Results from '../results/Results';
 import { Button } from '../Button/Button';
-import type { ApiResponse, SearchAppState } from '../../interfaces/interfaces';
+import type { SearchAppState } from '../../interfaces/interfaces';
+import {
+  fetchCharacters,
+  getSavedSearchQuery,
+  saveSearchQuery,
+} from '../../api/rickAndMortyApi';
 
 class Main extends React.Component<object, SearchAppState> {
   constructor(props: object) {
@@ -24,32 +29,17 @@ class Main extends React.Component<object, SearchAppState> {
   }
 
   componentDidMount() {
-    this.fetchCharacters(1, this.state.searchQuery);
+    const savedQuery = getSavedSearchQuery();
+    this.setState({ searchQuery: savedQuery }, () => {
+      this.fetchCharacters(1, savedQuery);
+    });
   }
 
   fetchCharacters = async (page: number = 1, name: string = '') => {
     this.setState({ loading: true, error: null });
 
     try {
-      let url = `https://rickandmortyapi.com/api/character/?page=${page}`;
-      if (name) {
-        url += `&name=${encodeURIComponent(name)}`;
-      }
-
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          return this.setState({
-            results: [],
-            loading: false,
-            totalPages: 0,
-          });
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: ApiResponse = await response.json();
+      const data = await fetchCharacters(page, name);
 
       this.setState({
         results: data.results,
@@ -67,22 +57,10 @@ class Main extends React.Component<object, SearchAppState> {
 
   handleSearch = (query: string) => {
     const cleanedQuery = query.trim();
+    saveSearchQuery(cleanedQuery);
 
-    localStorage.setItem('rickAndMortySearchQuery', cleanedQuery);
-
-    this.setState(
-      {
-        searchQuery: cleanedQuery,
-        currentPage: 1,
-      },
-      () => {
-        if (this.state.searchQuery) {
-          this.fetchCharacters(1, this.state.searchQuery);
-        } else {
-          this.fetchCharacters(1, this.state.searchQuery);
-          localStorage.removeItem('rickAndMortySearchQuery');
-        }
-      }
+    this.setState({ searchQuery: cleanedQuery, currentPage: 1 }, () =>
+      this.fetchCharacters(1, cleanedQuery)
     );
   };
 

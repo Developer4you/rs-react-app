@@ -11,7 +11,7 @@ interface ControlsProps {
 
 class Controls extends React.Component<ControlsProps> {
   state = {
-    inputValue: this.props.initialValue || '', // Используем переданное начальное значение
+    inputValue: this.props.initialValue || '',
   };
 
   componentDidMount() {
