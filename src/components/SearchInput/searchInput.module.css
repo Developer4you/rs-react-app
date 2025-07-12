@@ -6,7 +6,9 @@
   border: 1px solid #1e3a8a;
   background-color: #0a1f44;
   color: #e0e6f6;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .input:focus {

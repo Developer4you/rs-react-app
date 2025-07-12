@@ -6,12 +6,18 @@ import { Button } from '../Button/Button';
 interface ControlsProps {
   onSearch: (query: string) => void;
   loading: boolean;
+  initialValue: string;
 }
 
 class Controls extends React.Component<ControlsProps> {
   state = {
-    inputValue: '',
+    inputValue: this.props.initialValue || '', // Используем переданное начальное значение
   };
+
+  componentDidMount() {
+    const savedQuery = localStorage.getItem('rickAndMortySearchQuery') || '';
+    this.setState({ inputValue: savedQuery.trim() });
+  }
 
   handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ inputValue: e.target.value });

@@ -8,14 +8,20 @@ import type { ApiResponse, MainState } from '../../interfaces/interfaces';
 class Main extends React.Component<object, MainState> {
   constructor(props: object) {
     super(props);
+    const savedQuery = localStorage.getItem('rickAndMortySearchQuery') || '';
+
     this.state = {
-      searchQuery: '',
+      searchQuery: savedQuery,
       results: [],
-      loading: false,
+      loading: Boolean(savedQuery),
       error: null,
       currentPage: 1,
       totalPages: 1,
     };
+  }
+
+  componentDidMount() {
+    this.fetchCharacters(1, this.state.searchQuery);
   }
 
   fetchCharacters = async (page: number = 1, name: string = '') => {
@@ -30,7 +36,6 @@ class Main extends React.Component<object, MainState> {
       const response = await fetch(url);
 
       if (!response.ok) {
-        // Если персонажи не найдены, API возвращает 404
         if (response.status === 404) {
           return this.setState({
             results: [],
@@ -58,8 +63,23 @@ class Main extends React.Component<object, MainState> {
   };
 
   handleSearch = (query: string) => {
-    this.setState({ searchQuery: query, currentPage: 1 }, () =>
-      this.fetchCharacters(1, query.trim())
+    const cleanedQuery = query.trim();
+
+    localStorage.setItem('rickAndMortySearchQuery', cleanedQuery);
+
+    this.setState(
+      {
+        searchQuery: cleanedQuery,
+        currentPage: 1,
+      },
+      () => {
+        if (this.state.searchQuery) {
+          this.fetchCharacters(1, this.state.searchQuery);
+        } else {
+          this.setState({ results: [] });
+          localStorage.removeItem('rickAndMortySearchQuery');
+        }
+      }
     );
   };
 
@@ -78,7 +98,11 @@ class Main extends React.Component<object, MainState> {
 
     return (
       <div className={styles.main}>
-        <Controls onSearch={this.handleSearch} loading={loading} />
+        <Controls
+          onSearch={this.handleSearch}
+          loading={loading}
+          initialValue={this.state.searchQuery}
+        />
         <Results
           items={results}
           loading={loading}
