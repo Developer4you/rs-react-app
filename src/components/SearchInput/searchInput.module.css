@@ -9,6 +9,7 @@
   transition:
     border-color 0.3s ease,
     box-shadow 0.3s ease;
+  margin-right: 10px;
 }
 
 .input:focus {
@@ -18,5 +19,5 @@
 }
 
 .input::placeholder {
-  color: #7b8cb2;
+  color: #1e3a8a;
 }

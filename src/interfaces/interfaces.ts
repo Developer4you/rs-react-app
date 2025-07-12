@@ -30,11 +30,14 @@ export interface ApiResponse {
   results: Character[];
 }
 
-export interface MainState {
+export interface SearchAppState {
   searchQuery: string;
   results: Character[];
   loading: boolean;
   error: string | null;
   currentPage: number;
   totalPages: number;
+  hasError: boolean;
+  shouldThrowError: boolean;
+  renderError: Error | null;
 }

@@ -2,9 +2,10 @@ import React from 'react';
 import styles from './results.module.css';
 import { Card } from '../Card/Card';
 import Spinner from '../Spinner/Spinner';
+import type { Character } from '../../interfaces/interfaces';
 
 interface ResultsProps {
-  items: any[];
+  items: Character[];
   loading: boolean;
   error: string | null;
   page: number;
@@ -17,6 +18,18 @@ class Results extends React.Component<ResultsProps> {
     const { items, loading, error, page, totalPages, onPageChange } =
       this.props;
 
+    if (error) {
+      if (error.includes('Critical API error')) {
+        throw new Error(error);
+      }
+
+      return (
+        <div style={{ color: 'red', padding: '20px', border: '1px solid red' }}>
+          <p>API Error: {error}</p>
+        </div>
+      );
+    }
+
     if (loading) {
       return (
         <div>
@@ -24,10 +37,6 @@ class Results extends React.Component<ResultsProps> {
           <div>Loading...</div>
         </div>
       );
-    }
-
-    if (error) {
-      return <div style={{ color: 'red' }}>{error}</div>;
     }
 
     if (items.length === 0) {

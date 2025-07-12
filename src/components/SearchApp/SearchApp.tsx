@@ -1,11 +1,11 @@
 import React from 'react';
-import styles from './main.module.css';
+import styles from './searchApp.module.css';
 import Controls from '../controls/Controls';
 import Results from '../results/Results';
 import { Button } from '../Button/Button';
-import type { ApiResponse, MainState } from '../../interfaces/interfaces';
+import type { ApiResponse, SearchAppState } from '../../interfaces/interfaces';
 
-class Main extends React.Component<object, MainState> {
+class Main extends React.Component<object, SearchAppState> {
   constructor(props: object) {
     super(props);
     const savedQuery = localStorage.getItem('rickAndMortySearchQuery') || '';
@@ -17,6 +17,9 @@ class Main extends React.Component<object, MainState> {
       error: null,
       currentPage: 1,
       totalPages: 1,
+      hasError: false,
+      shouldThrowError: false,
+      renderError: null,
     };
   }
 
@@ -76,7 +79,7 @@ class Main extends React.Component<object, MainState> {
         if (this.state.searchQuery) {
           this.fetchCharacters(1, this.state.searchQuery);
         } else {
-          this.setState({ results: [] });
+          this.fetchCharacters(1, this.state.searchQuery);
           localStorage.removeItem('rickAndMortySearchQuery');
         }
       }
@@ -87,17 +90,30 @@ class Main extends React.Component<object, MainState> {
     this.fetchCharacters(newPage, this.state.searchQuery);
   };
 
-  simulateError = () => {
+  simulateError = (): void => {
+    const errorTypes: Array<() => Error> = [
+      () => new Error('Test error from button click!'),
+      () => new TypeError('nonExistentMethod is not a function'),
+      () => new SyntaxError('Invalid JSON'),
+    ];
+
+    const error = errorTypes[Math.floor(Math.random() * errorTypes.length)]();
     this.setState({
-      error: 'Simulated error: Something went wrong!',
+      shouldThrowError: true,
+      renderError: error,
     });
   };
 
   render() {
     const { results, loading, error, currentPage, totalPages } = this.state;
+    const { shouldThrowError, renderError } = this.state;
+
+    if (shouldThrowError && renderError) {
+      throw renderError;
+    }
 
     return (
-      <div className={styles.main}>
+      <div className={styles.searchApp}>
         <Controls
           onSearch={this.handleSearch}
           loading={loading}

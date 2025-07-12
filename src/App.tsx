@@ -1,10 +1,13 @@
 import './App.css';
-import Main from './components/main/Main';
+import SearchApp from './components/SearchApp/SearchApp';
+import ErrorBoundary from './ErrorBoundary';
 
 function App() {
   return (
     <>
-      <Main />
+      <ErrorBoundary>
+        <SearchApp />
+      </ErrorBoundary>
     </>
   );
 }

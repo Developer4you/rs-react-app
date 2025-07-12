@@ -1,7 +1,10 @@
 .results {
   width: 100%;
   flex: 1;
-  border: 1px solid blueviolet;
+  border: 1px solid #1e3a8a;
+  background-color: #0a1f44;
+  border-radius: 8px;
+  
 }
 
 .list {

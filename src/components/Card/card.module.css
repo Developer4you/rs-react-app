@@ -3,15 +3,25 @@
   width: 15vw;
   margin: 10px;
   text-align: start;
+  overflow: hidden;
 }
 
 .image {
   width: 80px;
+  height: 80px;
   margin-right: 10px;
 }
 
+.name {
+  font-size: 0.8rem;
+}
+
 .location {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
+  white-space: nowrap;       
+  overflow: hidden;          
+  text-overflow: ellipsis;   
+  max-width: 100%; 
 }
 
 .gender {
