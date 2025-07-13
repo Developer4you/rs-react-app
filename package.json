@@ -1,4 +1,5 @@
 {
+  "homepage": "https://Developer4you.github.io/rs-react-app",
   "name": "rs-react-app",
   "private": true,
   "version": "0.0.0",
@@ -6,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "prepare": "husky install",
     "lint": "eslint .",
     "preview": "vite preview",
