@@ -44,7 +44,29 @@ describe('ErrorBoundary Component', () => {
   });
 
   it('recovers after error when reset button is clicked', async () => {
-    const resetButton = screen.getByRole('button', { name: /try to recover/i });
+    let shouldThrow = true;
+
+    const TestComponent = () => {
+      if (shouldThrow) {
+        throw new Error('Test Error');
+      }
+      return <div>Normal content</div>;
+    };
+
+    render(
+      <ErrorBoundary>
+        <TestComponent />
+      </ErrorBoundary>
+    );
+
+    expect(screen.getByText('Something went wrong!')).toBeInTheDocument();
+
+    const resetButton = screen.getByRole('button', {
+      name: 'Try to recover',
+    });
+
+    shouldThrow = false;
+
     await userEvent.click(resetButton);
 
     await waitFor(
