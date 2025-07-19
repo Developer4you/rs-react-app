@@ -7,7 +7,12 @@ class Spinner extends React.Component {
   render() {
     return (
       <div className={styles.spinnerContainer}>
-        <img src={ReactLogo} alt="Loading..." className={styles.spinner} />
+        <img
+          src={ReactLogo}
+          alt="Loading..."
+          className={styles.spinner}
+          data-testid="spinner"
+        />
       </div>
     );
   }

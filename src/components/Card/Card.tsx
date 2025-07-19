@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import styles from './card.module.css';
+import ReactLogo from '../../assets/react.svg';
 
 type CardProps = {
   image: string;
@@ -14,11 +15,21 @@ export class Card extends Component<CardProps> {
 
     return (
       <div className={styles.card}>
-        <img className={styles.image} src={image} alt={name} />
+        <img
+          className={styles.image}
+          src={image ? image : ReactLogo}
+          alt={name ? name : 'Avatar'}
+        />
         <div>
-          <div className={styles.name}>{name}</div>
-          <div className={styles.location}>{locationName}</div>
-          <div className={styles.gender}>{gender}</div>
+          <div className={styles.name} data-testid="name">
+            {name ? name : 'Name is empty'}
+          </div>
+          <div className={styles.location} data-testid="location">
+            {locationName ? locationName : 'Location is empty'}
+          </div>
+          <div className={styles.gender} data-testid="gender">
+            {gender ? gender : 'Gender is empty'}
+          </div>
         </div>
       </div>
     );
