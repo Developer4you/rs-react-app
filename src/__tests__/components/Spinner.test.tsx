@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import Spinner from './Spinner';
+import Spinner from '../../components/Spinner/Spinner';
 import { describe, it, expect } from 'vitest';
-import styles from './Spinner.module.css';
+import styles from '../../components/Spinner/Spinner.module.css';
 
 describe('Spinner Component', () => {
   it('renders spinner with React logo', () => {

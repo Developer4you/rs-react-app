@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import Results from './Results';
+import Results from '../../components/results/Results';
 import { type Character } from '../../interfaces/interfaces';
 import { describe, it, vi, expect } from 'vitest';
 

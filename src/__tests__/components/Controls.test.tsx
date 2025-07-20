@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Controls from './Controls';
+import Controls from '../../components/controls/Controls';
 import { describe, vi, beforeEach, it, expect } from 'vitest';
 
 describe('Controls Component', () => {

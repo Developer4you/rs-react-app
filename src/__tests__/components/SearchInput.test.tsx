@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SearchInput } from './SearchInput';
+import { SearchInput } from '../../components/SearchInput/SearchInput';
 import { describe, it, vi, expect } from 'vitest';
 
 describe('SearchInput Component', () => {

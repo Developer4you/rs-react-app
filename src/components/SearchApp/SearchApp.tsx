@@ -10,7 +10,7 @@ import {
   saveSearchQuery,
 } from '../../api/rickAndMortyApi';
 
-class Main extends React.Component<object, SearchAppState> {
+class SearchApp extends React.Component<object, SearchAppState> {
   constructor(props: object) {
     super(props);
     const savedQuery = localStorage.getItem('rickAndMortySearchQuery') || '';
@@ -119,4 +119,4 @@ class Main extends React.Component<object, SearchAppState> {
   }
 }
 
-export default Main;
+export default SearchApp;

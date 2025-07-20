@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Card } from './Card';
+import { Card } from '../../components/Card/Card';
 import { describe, it, expect } from 'vitest';
 import ReactLogo from '../../assets/react.svg';
 
