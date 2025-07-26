@@ -15,8 +15,10 @@ class Controls extends React.Component<ControlsProps> {
   };
 
   componentDidMount() {
-    const savedQuery = localStorage.getItem('rickAndMortySearchQuery') || '';
-    this.setState({ inputValue: savedQuery.trim() });
+    if (!this.props.initialValue) {
+      const savedQuery = localStorage.getItem('rickAndMortySearchQuery') || '';
+      this.setState({ inputValue: savedQuery.trim() });
+    }
   }
 
   handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,8 +26,9 @@ class Controls extends React.Component<ControlsProps> {
   };
 
   handleSearchClick = () => {
-    this.setState({ inputValue: this.state.inputValue.trim() });
-    this.props.onSearch(this.state.inputValue);
+    const trimmed = this.state.inputValue.trim();
+    this.setState({ inputValue: trimmed });
+    this.props.onSearch(trimmed);
   };
 
   render() {
