@@ -1,0 +1,20 @@
+.details {
+  background-color: #0a1f44;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #1e3a8a;
+}
+
+.details img {
+  width: 100%;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.details h2 {
+  margin-top: 0;
+}
+
+.details p {
+  margin: 5px 0;
+}

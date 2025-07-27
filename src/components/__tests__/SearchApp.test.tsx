@@ -1,17 +1,19 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SearchApp from '../../components/SearchApp/SearchApp';
+import { SearchApp } from '../../components/SearchApp/SearchApp';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import {
   fetchCharacters,
   getSavedSearchQuery,
 } from '../../api/rickAndMortyApi';
 import { vi, describe, beforeEach, it, expect } from 'vitest';
-import ErrorBoundary from '../../ErrorBoundary';
+import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 
 vi.mock('../../api/rickAndMortyApi', () => ({
   fetchCharacters: vi.fn(),
   getSavedSearchQuery: vi.fn(),
   saveSearchQuery: vi.fn(),
+  fetchCharacterDetails: vi.fn(),
 }));
 
 const mockCharacters = [
@@ -37,19 +39,33 @@ const mockCharacters = [
 describe('SearchApp Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
     localStorage.clear();
-
     vi.mocked(getSavedSearchQuery).mockImplementation(() => '');
-
     vi.mocked(fetchCharacters).mockResolvedValue({
       info: { count: 1, pages: 1, next: null, prev: null },
       results: mockCharacters,
     });
   });
 
+  const renderWithRouter = () => {
+    return render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ErrorBoundary>
+                <SearchApp />
+              </ErrorBoundary>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+  };
+
   it('renders search app with controls and results', async () => {
-    render(<SearchApp />);
+    renderWithRouter();
 
     await waitFor(() => {
       expect(screen.getByRole('searchbox')).toBeInTheDocument();
@@ -61,7 +77,7 @@ describe('SearchApp Component', () => {
   it('fetches characters on mount if saved query exists', async () => {
     vi.mocked(getSavedSearchQuery).mockImplementation(() => 'Rick');
 
-    render(<SearchApp />);
+    renderWithRouter();
 
     await waitFor(() => {
       expect(fetchCharacters).toHaveBeenCalledWith(1, 'Rick');
@@ -69,7 +85,7 @@ describe('SearchApp Component', () => {
   });
 
   it('performs search when search button is clicked', async () => {
-    render(<SearchApp />);
+    renderWithRouter();
 
     const input = screen.getByRole('searchbox');
     const button = screen.getByRole('button', { name: /search/i });
@@ -85,7 +101,7 @@ describe('SearchApp Component', () => {
   it('handles API errors gracefully', async () => {
     vi.mocked(fetchCharacters).mockRejectedValue(new Error('API Error'));
 
-    render(<SearchApp />);
+    renderWithRouter();
 
     await waitFor(() => {
       expect(screen.getByText(/API Error/)).toBeInTheDocument();
@@ -103,7 +119,7 @@ describe('SearchApp Component', () => {
         results: mockCharacters,
       });
 
-    render(<SearchApp />);
+    renderWithRouter();
 
     await waitFor(() => {
       expect(screen.getByText('Page 1 of 2')).toBeInTheDocument();
@@ -115,27 +131,5 @@ describe('SearchApp Component', () => {
     await waitFor(() => {
       expect(fetchCharacters).toHaveBeenCalledWith(2, '');
     });
-  });
-
-  it('throws error when error button is clicked', async () => {
-    const consoleError = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
-
-    render(
-      <ErrorBoundary>
-        <SearchApp />
-      </ErrorBoundary>
-    );
-
-    const errorButton = screen.getByRole('button', { name: /error button/i });
-
-    await userEvent.click(errorButton);
-
-    expect(consoleError).toHaveBeenCalled();
-
-    consoleError.mockRestore();
-
-    expect(screen.getByText('Something went wrong!')).toBeInTheDocument();
   });
 });

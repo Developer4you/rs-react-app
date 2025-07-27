@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ErrorBoundary from '../../ErrorBoundary';
+import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { describe, beforeAll, vi, afterAll, it, expect } from 'vitest';
 
 const ErrorComponent = ({ shouldThrow }: { shouldThrow: boolean }) => {
