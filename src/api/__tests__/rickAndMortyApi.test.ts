@@ -132,6 +132,10 @@ describe('rickAndMortyApi', () => {
     });
 
     it('should handle HTTP errors in fetchCharacterDetails', async () => {
+      const consoleErrorMock = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
       vi.mocked(fetch).mockResolvedValueOnce({
         ok: false,
         status: 404,
@@ -142,6 +146,13 @@ describe('rickAndMortyApi', () => {
       await expect(fetchCharacterDetails(999)).rejects.toThrow(
         'HTTP error! status: 404'
       );
+
+      expect(consoleErrorMock).toHaveBeenCalledWith(
+        'API request failed:',
+        expect.any(Error)
+      );
+
+      consoleErrorMock.mockRestore();
     });
 
     it('should handle network errors in fetchCharacterDetails', async () => {
