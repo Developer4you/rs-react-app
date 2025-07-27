@@ -29,7 +29,10 @@ describe('About Component', () => {
     );
 
     const courseLink = screen.getByText('RS School React Course');
-    expect(courseLink).toHaveAttribute('href', 'https://rs.school/react/');
+    expect(courseLink).toHaveAttribute(
+      'href',
+      'https://rs.school/courses/reactjs'
+    );
     expect(courseLink).toHaveAttribute('target', '_blank');
 
     const backLink = screen.getByText('Back to Search');

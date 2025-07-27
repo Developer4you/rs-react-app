@@ -11,3 +11,7 @@
   background: rgba(30, 41, 59, 0.8);
   backdrop-filter: blur(5px);
 }
+
+.navContainer {
+  margin: 20px auto;
+}

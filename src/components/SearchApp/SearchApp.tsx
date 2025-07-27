@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './searchApp.module.css';
-import { useSearchParams, Outlet } from 'react-router-dom';
+import { useSearchParams, Outlet, Link } from 'react-router-dom';
 import {
   fetchCharacters,
   getSavedSearchQuery,
@@ -78,6 +78,11 @@ export const SearchApp = () => {
 
   return (
     <div className={styles.searchApp}>
+      <div className={styles.navContainer}>
+        <Link to="/about" className={styles.navLink}>
+          About application
+        </Link>
+      </div>
       <Controls
         onSearch={handleSearch}
         loading={loading}
