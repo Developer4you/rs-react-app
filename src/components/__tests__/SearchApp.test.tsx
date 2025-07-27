@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { SearchApp } from '../../components/SearchApp/SearchApp';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import {
+  fetchCharacterDetails,
   fetchCharacters,
   getSavedSearchQuery,
 } from '../../api/rickAndMortyApi';
@@ -130,6 +131,83 @@ describe('SearchApp Component', () => {
 
     await waitFor(() => {
       expect(fetchCharacters).toHaveBeenCalledWith(2, '');
+    });
+  });
+
+  it('renders character details when detailsParam is present', async () => {
+    const mockCharacter = {
+      id: 1,
+      name: 'Rick Sanchez',
+      status: 'Alive',
+      species: 'Human',
+      type: '',
+      gender: 'Male',
+      origin: { name: 'Earth (C-137)', url: '' },
+      location: { name: 'Earth (Replacement Dimension)', url: '' },
+      image: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
+      episode: [],
+      url: '',
+      created: new Date().toISOString(),
+    };
+
+    vi.mocked(fetchCharacterDetails).mockResolvedValue(mockCharacter);
+    vi.mocked(fetchCharacters).mockResolvedValue({
+      info: { count: 1, pages: 1, next: null, prev: null },
+      results: [],
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/?details=1']}>
+        <Routes>
+          <Route path="/" element={<SearchApp />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Rick Sanchez')).toBeInTheDocument();
+    });
+  });
+
+  it('closes character details when close button is clicked', async () => {
+    const mockCharacter = {
+      id: 1,
+      name: 'Rick Sanchez',
+      status: 'Alive',
+      species: 'Human',
+      type: '',
+      gender: 'Male',
+      origin: { name: 'Earth (C-137)', url: '' },
+      location: { name: 'Earth (Replacement Dimension)', url: '' },
+      image: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
+      episode: [],
+      url: '',
+      created: new Date().toISOString(),
+    };
+
+    vi.mocked(fetchCharacterDetails).mockResolvedValue(mockCharacter);
+    vi.mocked(fetchCharacters).mockResolvedValue({
+      info: { count: 1, pages: 1, next: null, prev: null },
+      results: [],
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/?details=1']}>
+        <Routes>
+          <Route path="/" element={<SearchApp />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Rick Sanchez')).toBeInTheDocument();
+    });
+
+    const closeButton = screen.getByText('Close');
+    await userEvent.click(closeButton);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Rick Sanchez')).not.toBeInTheDocument();
     });
   });
 });
