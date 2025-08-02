@@ -18,7 +18,7 @@ export const Results = ({
     }
 
     return (
-      <div style={{ color: 'red', padding: '20px', border: '1px solid red' }}>
+      <div style={{ color: 'red', padding: '20px' }}>
         <p>API Error: {error}</p>
       </div>
     );

@@ -11,11 +11,13 @@ import { CharacterDetails } from '../CharacterDetails/CharacterDetails';
 import type { ApiResponse, Character } from '../../interfaces/interfaces';
 import { Controls } from '../controls/Controls';
 import { Results } from '../results/Results';
+import { Spinner } from '../Spinner/Spinner';
 
 export const SearchApp = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [results, setResults] = useState<Character[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -34,6 +36,7 @@ export const SearchApp = () => {
     if (detailsParam) {
       fetchCharacterDetails(parseInt(detailsParam))
         .then(setSelectedCharacter)
+        .then(() => setLoadingDetails(false))
         .catch(handleApiError);
     }
 
@@ -56,14 +59,29 @@ export const SearchApp = () => {
   const handleSearch = (query: string) => {
     const cleanedQuery = query.trim();
     saveSearchQuery(cleanedQuery);
-    setSearchParams({ search: cleanedQuery, page: '1' });
+    const newSearchParams: Record<string, string> = {
+      search: cleanedQuery,
+      page: '1',
+    };
+    if (selectedCharacter?.id) {
+      newSearchParams.details = selectedCharacter.id.toString();
+    }
+    setSearchParams(newSearchParams);
   };
 
   const handlePageChange = (newPage: number) => {
-    setSearchParams({ search: searchQuery, page: newPage.toString() });
+    const newSearchParams: Record<string, string> = {
+      search: searchQuery,
+      page: newPage.toString(),
+    };
+    if (selectedCharacter?.id) {
+      newSearchParams.details = selectedCharacter.id.toString();
+    }
+    setSearchParams(newSearchParams);
   };
 
   const handleCharacterClick = (characterId: number) => {
+    if (selectedCharacter?.id !== characterId) setLoadingDetails(true);
     setSearchParams({
       search: searchQuery,
       page: currentPage.toString(),
@@ -88,7 +106,7 @@ export const SearchApp = () => {
         loading={loading}
         initialValue={searchQuery}
       />
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', border: '1px solid red' }}>
         <div style={{ flex: 1 }}>
           <Results
             items={results}
@@ -100,11 +118,17 @@ export const SearchApp = () => {
             onCharacterClick={handleCharacterClick}
           />
         </div>
-        {selectedCharacter && (
+        {loadingDetails ? (
           <div style={{ width: '300px', marginLeft: '20px' }}>
-            <button onClick={handleCloseDetails}>Close</button>
-            <CharacterDetails character={selectedCharacter} />
+            <Spinner />
           </div>
+        ) : (
+          selectedCharacter && (
+            <div style={{ width: '300px', marginLeft: '20px' }}>
+              <button onClick={handleCloseDetails}>Close</button>
+              <CharacterDetails character={selectedCharacter} />
+            </div>
+          )
         )}
       </div>
       <Outlet />
