@@ -1,10 +1,11 @@
 .flyout {
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-color);
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #0a1f44;
-  border-top: 1px solid #1e3a8a;
   padding: 15px;
   z-index: 1000;
 }

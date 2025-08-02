@@ -1,0 +1,10 @@
+.container {
+  padding: 20px;
+  text-align: center;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+.link {
+  color: var(--primary-color);
+}

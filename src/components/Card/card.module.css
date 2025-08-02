@@ -1,4 +1,7 @@
 .card {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-radius: 10px;
   display: flex;
   width: 15vw;
   margin: 10px;

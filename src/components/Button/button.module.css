@@ -1,7 +1,7 @@
 .button {
-  background-color: #0a1f44;
-  color: #e0e6f6;
-  border: 1px solid #1e3a8a;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   padding: 12px 24px;
   font-size: 16px;
   border-radius: 8px;
@@ -12,7 +12,7 @@
 }
 
 .button:hover {
-  background-color: #112e66;
+  background-color: var(--hover-color);
   transform: translateY(-2px);
 }
 
@@ -22,7 +22,7 @@
 }
 
 .button:disabled {
-  background-color: #1c2b4d;
+  background-color: var(--disabled-color);
   color: #7b8cb2;
   border-color: #33456c;
   cursor: not-allowed;

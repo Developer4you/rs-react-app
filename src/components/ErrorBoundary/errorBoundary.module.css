@@ -1,0 +1,17 @@
+.container {
+  padding: 20px;
+  color: red;
+  border: 1px solid red;
+  margin: 20px;
+  text-align: center;
+  background-color: var(--card-bg);
+}
+
+.recoverButton {
+  padding: 8px 16px;
+  margin-top: 10px;
+  cursor: pointer;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}

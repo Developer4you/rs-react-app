@@ -13,6 +13,7 @@ import { Controls } from '../controls/Controls';
 import { Results } from '../results/Results';
 import { Spinner } from '../Spinner/Spinner';
 import { Flyout } from '../Flyout/Flyout';
+import { useTheme } from '../../context/ThemeContext';
 
 export const SearchApp = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,6 +26,7 @@ export const SearchApp = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null
   );
+  const { theme, toggleTheme } = useTheme();
 
   const searchQuery = searchParams.get('search') || getSavedSearchQuery();
   const pageParam = searchParams.get('page');
@@ -101,6 +103,9 @@ export const SearchApp = () => {
         <Link to="/about" className={styles.navLink}>
           About application
         </Link>
+        <button onClick={toggleTheme} className={styles.themeToggle}>
+          {theme === 'light' ? '🌙 Dark' : '☀️ Light'} Mode
+        </button>
       </div>
       <Controls
         onSearch={handleSearch}

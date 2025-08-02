@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './errorBoundary.module.css';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -35,15 +36,7 @@ class ErrorBoundary extends React.Component<
   render(): React.ReactNode {
     if (this.state.hasError) {
       return (
-        <div
-          style={{
-            padding: '20px',
-            color: 'red',
-            border: '1px solid red',
-            margin: '20px',
-            textAlign: 'center',
-          }}
-        >
+        <div className={styles.container}>
           <h2>Something went wrong!</h2>
           <p>
             <strong>Error:</strong> {this.state.error?.toString()}
@@ -52,14 +45,7 @@ class ErrorBoundary extends React.Component<
             <strong>Component stack:</strong>{' '}
             {this.state.errorInfo?.componentStack}
           </p>
-          <button
-            onClick={this.handleReset}
-            style={{
-              padding: '8px 16px',
-              marginTop: '10px',
-              cursor: 'pointer',
-            }}
-          >
+          <button onClick={this.handleReset} className={styles.recoverButton}>
             Try to recover
           </button>
         </div>
