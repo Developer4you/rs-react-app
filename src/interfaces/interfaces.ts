@@ -50,3 +50,21 @@ export interface ResultsProps {
   onPageChange: (page: number) => void;
   onCharacterClick: (characterId: number) => void;
 }
+
+export interface CardProps {
+  id: number;
+  image: string;
+  name: string;
+  locationName: string;
+  gender: string;
+  detailsUrl: string;
+}
+
+export interface SelectedItem {
+  id: number;
+  name: string;
+  locationName: string;
+  gender: string;
+  image: string;
+  detailsUrl: string;
+}

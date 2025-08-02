@@ -12,6 +12,7 @@ import type { ApiResponse, Character } from '../../interfaces/interfaces';
 import { Controls } from '../controls/Controls';
 import { Results } from '../results/Results';
 import { Spinner } from '../Spinner/Spinner';
+import { Flyout } from '../Flyout/Flyout';
 
 export const SearchApp = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -106,7 +107,7 @@ export const SearchApp = () => {
         loading={loading}
         initialValue={searchQuery}
       />
-      <div style={{ display: 'flex', border: '1px solid red' }}>
+      <div style={{ display: 'flex' }}>
         <div style={{ flex: 1 }}>
           <Results
             items={results}
@@ -132,6 +133,7 @@ export const SearchApp = () => {
         )}
       </div>
       <Outlet />
+      <Flyout />
     </div>
   );
 };

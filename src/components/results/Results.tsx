@@ -53,6 +53,8 @@ export const Results = ({
                 name={item.name}
                 locationName={item.location.name}
                 gender={item.gender}
+                id={item.id}
+                detailsUrl={item.url}
               />
             </div>
           ))}
