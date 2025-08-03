@@ -1,122 +1,137 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import styles from './searchApp.module.css';
-import Controls from '../controls/Controls';
-import Results from '../results/Results';
-import { Button } from '../Button/Button';
-import type { SearchAppState } from '../../interfaces/interfaces';
+import { useSearchParams, Outlet, Link } from 'react-router-dom';
 import {
   fetchCharacters,
   getSavedSearchQuery,
   saveSearchQuery,
+  fetchCharacterDetails,
 } from '../../api/rickAndMortyApi';
+import { CharacterDetails } from '../CharacterDetails/CharacterDetails';
+import type { ApiResponse, Character } from '../../interfaces/interfaces';
+import { Controls } from '../controls/Controls';
+import { Results } from '../results/Results';
+import { Spinner } from '../Spinner/Spinner';
 
-class SearchApp extends React.Component<object, SearchAppState> {
-  constructor(props: object) {
-    super(props);
-    const savedQuery = localStorage.getItem('rickAndMortySearchQuery') || '';
+export const SearchApp = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [results, setResults] = useState<Character[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
+    null
+  );
 
-    this.state = {
-      searchQuery: savedQuery,
-      results: [],
-      loading: Boolean(savedQuery),
-      error: null,
-      currentPage: 1,
-      totalPages: 1,
-      hasError: false,
-      shouldThrowError: false,
-      renderError: null,
-    };
-  }
+  const searchQuery = searchParams.get('search') || getSavedSearchQuery();
+  const pageParam = searchParams.get('page');
+  const detailsParam = searchParams.get('details');
 
-  componentDidMount() {
-    const savedQuery = getSavedSearchQuery();
-    this.setState({ searchQuery: savedQuery }, () => {
-      this.fetchCharacters(1, savedQuery);
-    });
-  }
+  useEffect(() => {
+    const page = pageParam ? parseInt(pageParam) : 1;
+    setCurrentPage(page);
 
-  fetchCharacters = async (page: number = 1, name: string = '') => {
-    this.setState({ loading: true, error: null });
-
-    try {
-      const data = await fetchCharacters(page, name);
-
-      this.setState({
-        results: data.results,
-        currentPage: page,
-        totalPages: data.info.pages,
-        loading: false,
-      });
-    } catch (error) {
-      this.setState({
-        error: error instanceof Error ? error.message : 'Unknown error',
-        loading: false,
-      });
+    if (detailsParam) {
+      fetchCharacterDetails(parseInt(detailsParam))
+        .then(setSelectedCharacter)
+        .then(() => setLoadingDetails(false))
+        .catch(handleApiError);
     }
+
+    fetchCharacters(page, searchQuery)
+      .then(handleApiResponse)
+      .catch(handleApiError);
+  }, [searchQuery, pageParam, detailsParam]);
+
+  const handleApiResponse = (data: ApiResponse) => {
+    setResults(data.results);
+    setTotalPages(data.info.pages);
+    setLoading(false);
   };
 
-  handleSearch = (query: string) => {
+  const handleApiError = (error: Error) => {
+    setError(error.message);
+    setLoading(false);
+  };
+
+  const handleSearch = (query: string) => {
     const cleanedQuery = query.trim();
     saveSearchQuery(cleanedQuery);
-
-    this.setState({ searchQuery: cleanedQuery, currentPage: 1 }, () =>
-      this.fetchCharacters(1, cleanedQuery)
-    );
+    const newSearchParams: Record<string, string> = {
+      search: cleanedQuery,
+      page: '1',
+    };
+    if (selectedCharacter?.id) {
+      newSearchParams.details = selectedCharacter.id.toString();
+    }
+    setSearchParams(newSearchParams);
   };
 
-  handlePageChange = (newPage: number) => {
-    this.fetchCharacters(newPage, this.state.searchQuery);
+  const handlePageChange = (newPage: number) => {
+    const newSearchParams: Record<string, string> = {
+      search: searchQuery,
+      page: newPage.toString(),
+    };
+    if (selectedCharacter?.id) {
+      newSearchParams.details = selectedCharacter.id.toString();
+    }
+    setSearchParams(newSearchParams);
   };
 
-  simulateError = (): void => {
-    const errorTypes: Array<() => Error> = [
-      () => new Error('Test error from button click!'),
-      () => new TypeError('nonExistentMethod is not a function'),
-      () => new SyntaxError('Invalid JSON'),
-    ];
-
-    const error = errorTypes[Math.floor(Math.random() * errorTypes.length)]();
-    this.setState({
-      shouldThrowError: true,
-      renderError: error,
+  const handleCharacterClick = (characterId: number) => {
+    if (selectedCharacter?.id !== characterId) setLoadingDetails(true);
+    setSearchParams({
+      search: searchQuery,
+      page: currentPage.toString(),
+      details: characterId.toString(),
     });
   };
 
-  render() {
-    const { results, loading, error, currentPage, totalPages } = this.state;
-    const { shouldThrowError, renderError } = this.state;
+  const handleCloseDetails = () => {
+    setSelectedCharacter(null);
+    setSearchParams({ search: searchQuery, page: currentPage.toString() });
+  };
 
-    if (shouldThrowError && renderError) {
-      throw renderError;
-    }
-
-    return (
-      <div className={styles.searchApp}>
-        <Controls
-          onSearch={this.handleSearch}
-          loading={loading}
-          initialValue={this.state.searchQuery}
-        />
-        <Results
-          items={results}
-          loading={loading}
-          error={error}
-          page={currentPage}
-          totalPages={totalPages}
-          onPageChange={this.handlePageChange}
-        />
-        <div
-          style={{ display: 'flex', justifyContent: 'end', padding: '20px 0' }}
-        >
-          <Button
-            label="Error Button"
-            maxWith="200px"
-            onClick={this.simulateError}
+  return (
+    <div className={styles.searchApp}>
+      <div className={styles.navContainer}>
+        <Link to="/about" className={styles.navLink}>
+          About application
+        </Link>
+      </div>
+      <Controls
+        onSearch={handleSearch}
+        loading={loading}
+        initialValue={searchQuery}
+      />
+      <div style={{ display: 'flex', border: '1px solid red' }}>
+        <div style={{ flex: 1 }}>
+          <Results
+            items={results}
+            loading={loading}
+            error={error}
+            page={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            onCharacterClick={handleCharacterClick}
           />
         </div>
+        {loadingDetails ? (
+          <div style={{ width: '300px', marginLeft: '20px' }}>
+            <Spinner />
+          </div>
+        ) : (
+          selectedCharacter && (
+            <div style={{ width: '300px', marginLeft: '20px' }}>
+              <button onClick={handleCloseDetails}>Close</button>
+              <CharacterDetails character={selectedCharacter} />
+            </div>
+          )
+        )}
       </div>
-    );
-  }
-}
-
-export default SearchApp;
+      <Outlet />
+    </div>
+  );
+};

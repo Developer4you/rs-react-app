@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './controls.module.css';
 import { SearchInput } from '../SearchInput/SearchInput';
 import { Button } from '../Button/Button';
@@ -9,43 +9,41 @@ interface ControlsProps {
   initialValue: string;
 }
 
-class Controls extends React.Component<ControlsProps> {
-  state = {
-    inputValue: this.props.initialValue || '',
-  };
+export const Controls = ({
+  onSearch,
+  loading,
+  initialValue,
+}: ControlsProps) => {
+  const [inputValue, setInputValue] = useState(initialValue || '');
 
-  componentDidMount() {
-    if (!this.props.initialValue) {
+  useEffect(() => {
+    if (!initialValue) {
       const savedQuery = localStorage.getItem('rickAndMortySearchQuery') || '';
-      this.setState({ inputValue: savedQuery.trim() });
+      setInputValue(savedQuery.trim());
     }
-  }
+  }, [initialValue]);
 
-  handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ inputValue: e.target.value });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
   };
 
-  handleSearchClick = () => {
-    const trimmed = this.state.inputValue.trim();
-    this.setState({ inputValue: trimmed });
-    this.props.onSearch(trimmed);
+  const handleSearchClick = () => {
+    const trimmed = inputValue.trim();
+    setInputValue(trimmed);
+    onSearch(trimmed);
   };
 
-  render() {
-    return (
-      <div className={styles.controls}>
-        <SearchInput
-          inputValue={this.state.inputValue}
-          handleInputChange={this.handleInputChange}
-        />
-        <Button
-          label={this.props.loading ? 'Searching...' : 'Search'}
-          onClick={this.handleSearchClick}
-          disabled={this.props.loading}
-        />
-      </div>
-    );
-  }
-}
-
-export default Controls;
+  return (
+    <div className={styles.controls}>
+      <SearchInput
+        inputValue={inputValue}
+        handleInputChange={handleInputChange}
+      />
+      <Button
+        label={loading ? 'Searching...' : 'Search'}
+        onClick={handleSearchClick}
+        disabled={loading}
+      />
+    </div>
+  );
+};

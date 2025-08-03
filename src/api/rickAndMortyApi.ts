@@ -1,4 +1,4 @@
-import type { ApiResponse } from '../interfaces/interfaces';
+import type { ApiResponse, Character } from '../interfaces/interfaces';
 
 const API_BASE_URL = 'https://rickandmortyapi.com/api';
 
@@ -37,4 +37,17 @@ export const getSavedSearchQuery = (): string => {
 
 export const saveSearchQuery = (query: string): void => {
   localStorage.setItem('rickAndMortySearchQuery', query.trim());
+};
+
+export const fetchCharacterDetails = async (id: number): Promise<Character> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/character/${id}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('API request failed:', error);
+    throw error;
+  }
 };

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import Results from '../../components/results/Results';
 import { type Character } from '../../interfaces/interfaces';
 import { describe, it, vi, expect } from 'vitest';
+import { Results } from '../../components/results/Results';
 
 describe('Results Component', () => {
   const mockCharacters: Character[] = [
@@ -50,6 +50,7 @@ describe('Results Component', () => {
         page={1}
         totalPages={1}
         onPageChange={vi.fn()}
+        onCharacterClick={vi.fn()}
       />
     );
 
@@ -66,6 +67,7 @@ describe('Results Component', () => {
         page={1}
         totalPages={1}
         onPageChange={vi.fn()}
+        onCharacterClick={vi.fn()}
       />
     );
 
@@ -81,6 +83,7 @@ describe('Results Component', () => {
         page={1}
         totalPages={1}
         onPageChange={vi.fn()}
+        onCharacterClick={vi.fn()}
       />
     );
 
@@ -96,6 +99,7 @@ describe('Results Component', () => {
         page={1}
         totalPages={1}
         onPageChange={vi.fn()}
+        onCharacterClick={vi.fn()}
       />
     );
 
@@ -112,6 +116,7 @@ describe('Results Component', () => {
         page={2}
         totalPages={3}
         onPageChange={vi.fn()}
+        onCharacterClick={vi.fn()}
       />
     );
 
@@ -132,6 +137,7 @@ describe('Results Component', () => {
         page={2}
         totalPages={3}
         onPageChange={mockOnPageChange}
+        onCharacterClick={vi.fn()}
       />
     );
 
@@ -151,6 +157,7 @@ describe('Results Component', () => {
         page={1}
         totalPages={3}
         onPageChange={vi.fn()}
+        onCharacterClick={vi.fn()}
       />
     );
 
@@ -165,10 +172,29 @@ describe('Results Component', () => {
         page={3}
         totalPages={3}
         onPageChange={vi.fn()}
+        onCharacterClick={vi.fn()}
       />
     );
 
     expect(screen.getByRole('button', { name: 'Previous' })).not.toBeDisabled();
     expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+  });
+
+  it('calls onCharacterClick when character card is clicked', () => {
+    const mockOnCharacterClick = vi.fn();
+    render(
+      <Results
+        items={mockCharacters}
+        loading={false}
+        error={null}
+        page={1}
+        totalPages={1}
+        onPageChange={vi.fn()}
+        onCharacterClick={mockOnCharacterClick}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Rick Sanchez'));
+    expect(mockOnCharacterClick).toHaveBeenCalledWith(1);
   });
 });

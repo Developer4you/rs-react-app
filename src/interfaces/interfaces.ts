@@ -40,3 +40,13 @@ export interface SearchAppState {
   shouldThrowError: boolean;
   renderError: Error | null;
 }
+
+export interface ResultsProps {
+  items: Character[];
+  loading: boolean;
+  error: string | null;
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onCharacterClick: (characterId: number) => void;
+}

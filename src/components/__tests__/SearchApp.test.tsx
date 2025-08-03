@@ -1,17 +1,20 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SearchApp from '../../components/SearchApp/SearchApp';
+import { SearchApp } from '../../components/SearchApp/SearchApp';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import {
+  fetchCharacterDetails,
   fetchCharacters,
   getSavedSearchQuery,
 } from '../../api/rickAndMortyApi';
 import { vi, describe, beforeEach, it, expect } from 'vitest';
-import ErrorBoundary from '../../ErrorBoundary';
+import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 
 vi.mock('../../api/rickAndMortyApi', () => ({
   fetchCharacters: vi.fn(),
   getSavedSearchQuery: vi.fn(),
   saveSearchQuery: vi.fn(),
+  fetchCharacterDetails: vi.fn(),
 }));
 
 const mockCharacters = [
@@ -37,19 +40,33 @@ const mockCharacters = [
 describe('SearchApp Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
     localStorage.clear();
-
     vi.mocked(getSavedSearchQuery).mockImplementation(() => '');
-
     vi.mocked(fetchCharacters).mockResolvedValue({
       info: { count: 1, pages: 1, next: null, prev: null },
       results: mockCharacters,
     });
   });
 
+  const renderWithRouter = () => {
+    return render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ErrorBoundary>
+                <SearchApp />
+              </ErrorBoundary>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+  };
+
   it('renders search app with controls and results', async () => {
-    render(<SearchApp />);
+    renderWithRouter();
 
     await waitFor(() => {
       expect(screen.getByRole('searchbox')).toBeInTheDocument();
@@ -61,7 +78,7 @@ describe('SearchApp Component', () => {
   it('fetches characters on mount if saved query exists', async () => {
     vi.mocked(getSavedSearchQuery).mockImplementation(() => 'Rick');
 
-    render(<SearchApp />);
+    renderWithRouter();
 
     await waitFor(() => {
       expect(fetchCharacters).toHaveBeenCalledWith(1, 'Rick');
@@ -69,7 +86,7 @@ describe('SearchApp Component', () => {
   });
 
   it('performs search when search button is clicked', async () => {
-    render(<SearchApp />);
+    renderWithRouter();
 
     const input = screen.getByRole('searchbox');
     const button = screen.getByRole('button', { name: /search/i });
@@ -85,7 +102,7 @@ describe('SearchApp Component', () => {
   it('handles API errors gracefully', async () => {
     vi.mocked(fetchCharacters).mockRejectedValue(new Error('API Error'));
 
-    render(<SearchApp />);
+    renderWithRouter();
 
     await waitFor(() => {
       expect(screen.getByText(/API Error/)).toBeInTheDocument();
@@ -103,7 +120,7 @@ describe('SearchApp Component', () => {
         results: mockCharacters,
       });
 
-    render(<SearchApp />);
+    renderWithRouter();
 
     await waitFor(() => {
       expect(screen.getByText('Page 1 of 2')).toBeInTheDocument();
@@ -117,25 +134,80 @@ describe('SearchApp Component', () => {
     });
   });
 
-  it('throws error when error button is clicked', async () => {
-    const consoleError = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
+  it('renders character details when detailsParam is present', async () => {
+    const mockCharacter = {
+      id: 1,
+      name: 'Rick Sanchez',
+      status: 'Alive',
+      species: 'Human',
+      type: '',
+      gender: 'Male',
+      origin: { name: 'Earth (C-137)', url: '' },
+      location: { name: 'Earth (Replacement Dimension)', url: '' },
+      image: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
+      episode: [],
+      url: '',
+      created: new Date().toISOString(),
+    };
+
+    vi.mocked(fetchCharacterDetails).mockResolvedValue(mockCharacter);
+    vi.mocked(fetchCharacters).mockResolvedValue({
+      info: { count: 1, pages: 1, next: null, prev: null },
+      results: [],
+    });
 
     render(
-      <ErrorBoundary>
-        <SearchApp />
-      </ErrorBoundary>
+      <MemoryRouter initialEntries={['/?details=1']}>
+        <Routes>
+          <Route path="/" element={<SearchApp />} />
+        </Routes>
+      </MemoryRouter>
     );
 
-    const errorButton = screen.getByRole('button', { name: /error button/i });
+    await waitFor(() => {
+      expect(screen.getByText('Rick Sanchez')).toBeInTheDocument();
+    });
+  });
 
-    await userEvent.click(errorButton);
+  it('closes character details when close button is clicked', async () => {
+    const mockCharacter = {
+      id: 1,
+      name: 'Rick Sanchez',
+      status: 'Alive',
+      species: 'Human',
+      type: '',
+      gender: 'Male',
+      origin: { name: 'Earth (C-137)', url: '' },
+      location: { name: 'Earth (Replacement Dimension)', url: '' },
+      image: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
+      episode: [],
+      url: '',
+      created: new Date().toISOString(),
+    };
 
-    expect(consoleError).toHaveBeenCalled();
+    vi.mocked(fetchCharacterDetails).mockResolvedValue(mockCharacter);
+    vi.mocked(fetchCharacters).mockResolvedValue({
+      info: { count: 1, pages: 1, next: null, prev: null },
+      results: [],
+    });
 
-    consoleError.mockRestore();
+    render(
+      <MemoryRouter initialEntries={['/?details=1']}>
+        <Routes>
+          <Route path="/" element={<SearchApp />} />
+        </Routes>
+      </MemoryRouter>
+    );
 
-    expect(screen.getByText('Something went wrong!')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Rick Sanchez')).toBeInTheDocument();
+    });
+
+    const closeButton = screen.getByText('Close');
+    await userEvent.click(closeButton);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Rick Sanchez')).not.toBeInTheDocument();
+    });
   });
 });
