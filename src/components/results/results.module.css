@@ -15,6 +15,10 @@
 .cardsBox {
   display: flex;
   flex-wrap: wrap;
+  max-height: 490px;
+  overflow-y: auto;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
 }
 
 .card {
