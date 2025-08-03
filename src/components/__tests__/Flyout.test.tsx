@@ -92,9 +92,20 @@ describe('Flyout Component', () => {
       clearAll: mockClearAll,
     });
 
+    const originalCreateElement = document.createElement.bind(document);
     const createElementSpy = vi.spyOn(document, 'createElement');
     const appendChildSpy = vi.spyOn(document.body, 'appendChild');
     const removeChildSpy = vi.spyOn(document.body, 'removeChild');
+
+    const mockClick = vi.fn();
+
+    createElementSpy.mockImplementation((tagName) => {
+      const element = originalCreateElement(tagName);
+      if (tagName === 'a') {
+        element.click = mockClick;
+      }
+      return element;
+    });
 
     render(<Flyout />);
     fireEvent.click(screen.getByText('Download'));
@@ -102,6 +113,7 @@ describe('Flyout Component', () => {
     expect(globalThis.URL.createObjectURL).toHaveBeenCalled();
     expect(createElementSpy).toHaveBeenCalledWith('a');
     expect(appendChildSpy).toHaveBeenCalled();
+    expect(mockClick).toHaveBeenCalled();
     expect(removeChildSpy).toHaveBeenCalled();
   });
 });

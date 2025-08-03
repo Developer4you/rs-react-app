@@ -13,7 +13,7 @@ import { Controls } from '../controls/Controls';
 import { Results } from '../results/Results';
 import { Spinner } from '../Spinner/Spinner';
 import { Flyout } from '../Flyout/Flyout';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 
 export const SearchApp = () => {
   const [searchParams, setSearchParams] = useSearchParams();
