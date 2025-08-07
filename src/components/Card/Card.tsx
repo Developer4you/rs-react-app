@@ -19,7 +19,8 @@ export const Card = ({
     setIsChecked(selectedItems.some((item) => item.id === id));
   }, [selectedItems, id]);
 
-  const handleCheckboxChange = () => {
+  const handleCheckboxChange = (e: React.MouseEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     toggleItem({
       id,
       name,
@@ -35,7 +36,8 @@ export const Card = ({
       <input
         type="checkbox"
         checked={isChecked}
-        onChange={handleCheckboxChange}
+        onChange={() => {}}
+        onClick={handleCheckboxChange}
         className={styles.checkbox}
       />
       <img
