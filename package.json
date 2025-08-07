@@ -28,6 +28,7 @@
     ]
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.84.1",
     "@types/react-router-dom": "^5.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
