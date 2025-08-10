@@ -198,25 +198,25 @@ describe('Results Component', () => {
     expect(mockOnCharacterClick).toHaveBeenCalledWith(1);
   });
 
-  it('throws error for critical API errors', () => {
+  it('renders critical API errors', () => {
     const consoleError = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {});
+    const errorMessage = 'Critical API error';
 
-    expect(() =>
-      render(
-        <Results
-          items={[]}
-          loading={false}
-          error="Critical API error"
-          page={1}
-          totalPages={1}
-          onPageChange={vi.fn()}
-          onCharacterClick={vi.fn()}
-        />
-      )
-    ).toThrow('Critical API error');
+    render(
+      <Results
+        items={[]}
+        loading={false}
+        error={errorMessage}
+        page={1}
+        totalPages={1}
+        onPageChange={vi.fn()}
+        onCharacterClick={vi.fn()}
+      />
+    );
 
+    expect(screen.getByText(`API Error: ${errorMessage}`)).toBeInTheDocument();
     consoleError.mockRestore();
   });
 });

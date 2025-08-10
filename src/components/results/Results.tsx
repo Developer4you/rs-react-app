@@ -11,12 +11,8 @@ export const Results = ({
   totalPages,
   onPageChange,
   onCharacterClick,
-}: ResultsProps) => {
+}: ResultsProps & { isCached?: boolean }) => {
   if (error) {
-    if (error.includes('Critical API error')) {
-      throw new Error(error);
-    }
-
     return (
       <div style={{ color: 'red', padding: '20px' }}>
         <p>API Error: {error}</p>

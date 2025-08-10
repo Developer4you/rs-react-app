@@ -1,22 +1,62 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Card } from '../../components/Card/Card';
-import { describe, it, expect } from 'vitest';
+import * as storeModule from '../../store/selectedItemsStore';
+import { describe, vi, it, expect, beforeEach } from 'vitest';
 import ReactLogo from '../../assets/react.svg';
 
-describe('Card Component', () => {
-  const mockProps = {
-    image: 'https://example.com/image.jpg',
-    name: 'Rick Sanchez',
-    locationName: 'Earth (C-137)',
-    gender: 'Male',
-  };
+const mockProps = {
+  id: 1,
+  image: 'https://example.com/image.jpg',
+  name: 'Rick Sanchez',
+  locationName: 'Earth (C-137)',
+  gender: 'Male',
+  detailsUrl: 'https://example.com/character/1',
+};
 
-  const emptyProps = {
-    image: '',
-    name: '',
-    locationName: '',
-    gender: '',
-  };
+describe('Card Component', () => {
+  const mockToggleItem = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(storeModule, 'useSelectedItemsStore').mockReturnValue({
+      selectedItems: [],
+      toggleItem: mockToggleItem,
+      removeItem: vi.fn(),
+      clearAll: vi.fn(),
+    });
+  });
+
+  it('calls toggleItem when checkbox is clicked', () => {
+    render(<Card {...mockProps} />);
+
+    const checkbox = screen.getByTestId(`checkbox-${mockProps.id}`);
+    fireEvent.click(checkbox);
+
+    expect(mockToggleItem).toHaveBeenCalledTimes(1);
+    expect(mockToggleItem).toHaveBeenCalledWith({
+      id: mockProps.id,
+      name: mockProps.name,
+      locationName: mockProps.locationName,
+      gender: mockProps.gender,
+      image: mockProps.image,
+      detailsUrl: mockProps.detailsUrl,
+    });
+  });
+
+  it('updates checkbox state when item is selected', () => {
+    vi.spyOn(storeModule, 'useSelectedItemsStore').mockReturnValue({
+      selectedItems: [{ ...mockProps }],
+      toggleItem: mockToggleItem,
+      removeItem: vi.fn(),
+      clearAll: vi.fn(),
+    });
+
+    render(<Card {...mockProps} />);
+    const checkbox = screen.getByTestId(
+      `checkbox-${mockProps.id}`
+    ) as HTMLInputElement;
+    expect(checkbox.checked).toBe(true);
+  });
 
   it('renders card with correct props', () => {
     render(<Card {...mockProps} />);
@@ -31,6 +71,15 @@ describe('Card Component', () => {
   });
 
   it('renders default values when props are empty', () => {
+    const emptyProps = {
+      id: 1,
+      image: '',
+      name: '',
+      locationName: '',
+      gender: '',
+      detailsUrl: '',
+    };
+
     render(<Card {...emptyProps} />);
 
     const img = screen.getByRole('img');
