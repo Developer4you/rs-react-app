@@ -14,10 +14,23 @@
 
 .navContainer {
   margin: 20px auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
 }
 
 .themeToggle {
-  margin-left: 20px;
+  padding: 8px 16px;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.refreshButton {
   padding: 8px 16px;
   background-color: var(--button-bg);
   color: var(--text-color);
@@ -28,4 +41,13 @@
 
 .navLink {
   color: var(--primary-color);
+}
+
+.errorMessage {
+  color: #ff4d4f;
+  padding: 10px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+  margin: 10px 0;
 }

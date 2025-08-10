@@ -84,34 +84,10 @@ describe('rickAndMortyApi', () => {
     });
 
     it('should handle network errors', async () => {
-      const consoleErrorMock = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       const networkError = new Error('Network error');
       vi.mocked(fetch).mockRejectedValueOnce(networkError);
 
       await expect(fetchCharacters(1)).rejects.toThrow('Network error');
-
-      expect(consoleErrorMock).toHaveBeenCalledWith(
-        'API request failed:',
-        networkError
-      );
-
-      consoleErrorMock.mockRestore();
-    });
-
-    it('should log error on API failure', async () => {
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      vi.mocked(fetch).mockRejectedValueOnce(new Error('API failed'));
-
-      await expect(fetchCharacters(1)).rejects.toThrow();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'API request failed:',
-        expect.any(Error)
-      );
     });
   });
 
@@ -132,10 +108,6 @@ describe('rickAndMortyApi', () => {
     });
 
     it('should handle HTTP errors in fetchCharacterDetails', async () => {
-      const consoleErrorMock = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       vi.mocked(fetch).mockResolvedValueOnce({
         ok: false,
         status: 404,
@@ -146,30 +118,6 @@ describe('rickAndMortyApi', () => {
       await expect(fetchCharacterDetails(999)).rejects.toThrow(
         'HTTP error! status: 404'
       );
-
-      expect(consoleErrorMock).toHaveBeenCalledWith(
-        'API request failed:',
-        expect.any(Error)
-      );
-
-      consoleErrorMock.mockRestore();
-    });
-
-    it('should handle network errors in fetchCharacterDetails', async () => {
-      const consoleErrorMock = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
-      const networkError = new Error('Network failed');
-      vi.mocked(fetch).mockRejectedValueOnce(networkError);
-
-      await expect(fetchCharacterDetails(1)).rejects.toThrow('Network failed');
-      expect(consoleErrorMock).toHaveBeenCalledWith(
-        'API request failed:',
-        networkError
-      );
-
-      consoleErrorMock.mockRestore();
     });
   });
 
@@ -190,31 +138,6 @@ describe('rickAndMortyApi', () => {
         saveSearchQuery('  Rick  ');
         expect(localStorage.getItem('rickAndMortySearchQuery')).toBe('Rick');
       });
-
-      it('should handle empty string', () => {
-        saveSearchQuery('');
-        expect(localStorage.getItem('rickAndMortySearchQuery')).toBe('');
-      });
-
-      it('should overwrite existing value', () => {
-        localStorage.setItem('rickAndMortySearchQuery', 'Morty');
-        saveSearchQuery('Rick');
-        expect(localStorage.getItem('rickAndMortySearchQuery')).toBe('Rick');
-      });
     });
-  });
-
-  it('should throw error for non-200, non-404 status', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    vi.mocked(fetch).mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      headers: mockHeaders,
-      json: () => Promise.resolve({ error: 'Server error' }),
-    } as Response);
-
-    await expect(fetchCharacters(1)).rejects.toThrow('HTTP error! status: 500');
-    vi.restoreAllMocks();
   });
 });

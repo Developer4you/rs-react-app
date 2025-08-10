@@ -1,73 +1,55 @@
-import { useState, useEffect } from 'react';
-import styles from './searchApp.module.css';
 import { useSearchParams, Outlet, Link } from 'react-router-dom';
-import {
-  fetchCharacters,
-  getSavedSearchQuery,
-  saveSearchQuery,
-  fetchCharacterDetails,
-} from '../../api/rickAndMortyApi';
+import { useQueryClient } from '@tanstack/react-query';
+import styles from './searchApp.module.css';
 import { CharacterDetails } from '../CharacterDetails/CharacterDetails';
-import type { ApiResponse, Character } from '../../interfaces/interfaces';
 import { Controls } from '../controls/Controls';
 import { Results } from '../results/Results';
 import { Spinner } from '../Spinner/Spinner';
 import { Flyout } from '../Flyout/Flyout';
 import { useTheme } from '../../context/useTheme';
+import {
+  useCharacterDetailsQuery,
+  useCharactersQuery,
+  useSearchQueryMutation,
+} from '../../hooks/rickAndMortyQueries';
 
 export const SearchApp = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [results, setResults] = useState<Character[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingDetails, setLoadingDetails] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
-    null
-  );
+  const queryClient = useQueryClient();
   const { theme, toggleTheme } = useTheme();
 
-  const searchQuery = searchParams.get('search') || getSavedSearchQuery();
+  const searchQuery = searchParams.get('search') || '';
   const pageParam = searchParams.get('page');
   const detailsParam = searchParams.get('details');
 
-  useEffect(() => {
-    const page = pageParam ? parseInt(pageParam) : 1;
-    setCurrentPage(page);
+  const currentPage = pageParam ? parseInt(pageParam) : 1;
+  const characterId = detailsParam ? parseInt(detailsParam) : undefined;
 
-    if (detailsParam) {
-      fetchCharacterDetails(parseInt(detailsParam))
-        .then(setSelectedCharacter)
-        .then(() => setLoadingDetails(false))
-        .catch(handleApiError);
-    }
+  const {
+    data: charactersData,
+    isLoading: loadingCharacters,
+    isError: charactersError,
+    error: charactersErrorObj,
+  } = useCharactersQuery(currentPage, searchQuery);
 
-    fetchCharacters(page, searchQuery)
-      .then(handleApiResponse)
-      .catch(handleApiError);
-  }, [searchQuery, pageParam, detailsParam]);
+  const {
+    data: characterDetails,
+    isLoading: loadingDetails,
+    isError: detailsError,
+    error: detailsErrorObj,
+  } = useCharacterDetailsQuery(characterId);
 
-  const handleApiResponse = (data: ApiResponse) => {
-    setResults(data.results);
-    setTotalPages(data.info.pages);
-    setLoading(false);
-  };
-
-  const handleApiError = (error: Error) => {
-    setError(error.message);
-    setLoading(false);
-  };
+  const { mutate: saveSearch } = useSearchQueryMutation();
 
   const handleSearch = (query: string) => {
     const cleanedQuery = query.trim();
-    saveSearchQuery(cleanedQuery);
+    saveSearch(cleanedQuery);
     const newSearchParams: Record<string, string> = {
       search: cleanedQuery,
       page: '1',
     };
-    if (selectedCharacter?.id) {
-      newSearchParams.details = selectedCharacter.id.toString();
+    if (characterId) {
+      newSearchParams.details = characterId.toString();
     }
     setSearchParams(newSearchParams);
   };
@@ -77,14 +59,13 @@ export const SearchApp = () => {
       search: searchQuery,
       page: newPage.toString(),
     };
-    if (selectedCharacter?.id) {
-      newSearchParams.details = selectedCharacter.id.toString();
+    if (characterId) {
+      newSearchParams.details = characterId.toString();
     }
     setSearchParams(newSearchParams);
   };
 
   const handleCharacterClick = (characterId: number) => {
-    if (selectedCharacter?.id !== characterId) setLoadingDetails(true);
     setSearchParams({
       search: searchQuery,
       page: currentPage.toString(),
@@ -93,8 +74,18 @@ export const SearchApp = () => {
   };
 
   const handleCloseDetails = () => {
-    setSelectedCharacter(null);
     setSearchParams({ search: searchQuery, page: currentPage.toString() });
+  };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({
+      queryKey: ['characters', currentPage, searchQuery],
+    });
+    if (characterId) {
+      queryClient.invalidateQueries({
+        queryKey: ['character', characterId],
+      });
+    }
   };
 
   return (
@@ -106,20 +97,35 @@ export const SearchApp = () => {
         <button onClick={toggleTheme} className={styles.themeToggle}>
           {theme === 'light' ? '🌙 Dark' : '☀️ Light'} Mode
         </button>
+        <button
+          onClick={handleRefresh}
+          className={styles.refreshButton}
+          aria-label="Refresh data"
+        >
+          Refresh Data
+        </button>
       </div>
       <Controls
         onSearch={handleSearch}
-        loading={loading}
+        loading={loadingCharacters}
         initialValue={searchQuery}
       />
       <div style={{ display: 'flex' }}>
         <div style={{ flex: 1 }}>
+          {charactersError && (
+            <div className={styles.errorMessage} data-testid="global-error">
+              Error:{' '}
+              {charactersErrorObj?.message || 'Failed to load characters'}
+            </div>
+          )}
           <Results
-            items={results}
-            loading={loading}
-            error={error}
+            items={charactersData?.results || []}
+            loading={loadingCharacters}
+            error={
+              charactersError ? charactersErrorObj?.message || 'Error' : null
+            }
             page={currentPage}
-            totalPages={totalPages}
+            totalPages={charactersData?.info.pages || 1}
             onPageChange={handlePageChange}
             onCharacterClick={handleCharacterClick}
           />
@@ -128,14 +134,21 @@ export const SearchApp = () => {
           <div style={{ width: '300px', marginLeft: '20px' }}>
             <Spinner />
           </div>
-        ) : (
-          selectedCharacter && (
-            <div style={{ width: '300px', marginLeft: '20px' }}>
-              <button onClick={handleCloseDetails}>Close</button>
-              <CharacterDetails character={selectedCharacter} />
-            </div>
-          )
-        )}
+        ) : detailsError ? (
+          <div
+            className={styles.errorMessage}
+            style={{ width: '300px', marginLeft: '20px' }}
+            data-testid="details-error"
+          >
+            Error:{' '}
+            {detailsErrorObj?.message || 'Failed to load character details'}
+          </div>
+        ) : characterDetails ? (
+          <div style={{ width: '300px', marginLeft: '20px' }}>
+            <button onClick={handleCloseDetails}>Close</button>
+            <CharacterDetails character={characterDetails} />
+          </div>
+        ) : null}
       </div>
       <Outlet />
       <Flyout />

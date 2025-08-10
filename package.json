@@ -1,5 +1,4 @@
 {
-  "homepage": "https://Developer4you.github.io/rs-react-app",
   "name": "rs-react-app",
   "private": true,
   "version": "0.0.0",
@@ -28,7 +27,7 @@
     ]
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.84.1",
+    "@tanstack/react-query": "^5.84.2",
     "@types/react-router-dom": "^5.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

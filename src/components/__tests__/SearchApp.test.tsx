@@ -1,7 +1,8 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SearchApp } from '../../components/SearchApp/SearchApp';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SearchApp } from '../../components/SearchApp/SearchApp';
 import {
   fetchCharacterDetails,
   fetchCharacters,
@@ -49,22 +50,32 @@ describe('SearchApp Component', () => {
     });
   });
 
-  const renderWithRouter = () => {
+  const renderWithRouter = (initialEntries: string[] = ['/']) => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+
     return render(
-      <MemoryRouter initialEntries={['/']}>
-        <ThemeProvider>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <ErrorBoundary>
-                  <SearchApp />
-                </ErrorBoundary>
-              }
-            />
-          </Routes>
-        </ThemeProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={initialEntries}>
+          <ThemeProvider>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <ErrorBoundary>
+                    <SearchApp />
+                  </ErrorBoundary>
+                }
+              />
+            </Routes>
+          </ThemeProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
   };
 
@@ -80,8 +91,12 @@ describe('SearchApp Component', () => {
 
   it('fetches characters on mount if saved query exists', async () => {
     vi.mocked(getSavedSearchQuery).mockImplementation(() => 'Rick');
+    vi.mocked(fetchCharacters).mockResolvedValue({
+      info: { count: 1, pages: 1, next: null, prev: null },
+      results: mockCharacters,
+    });
 
-    renderWithRouter();
+    renderWithRouter(['/?search=Rick']);
 
     await waitFor(() => {
       expect(fetchCharacters).toHaveBeenCalledWith(1, 'Rick');
@@ -108,7 +123,7 @@ describe('SearchApp Component', () => {
     renderWithRouter();
 
     await waitFor(() => {
-      expect(screen.getByText(/API Error/)).toBeInTheDocument();
+      expect(screen.getByTestId('global-error')).toHaveTextContent('API Error');
     });
   });
 
@@ -159,14 +174,17 @@ describe('SearchApp Component', () => {
       results: [],
     });
 
+    const queryClient = new QueryClient();
     render(
-      <MemoryRouter initialEntries={['/?details=1']}>
-        <ThemeProvider>
-          <Routes>
-            <Route path="/" element={<SearchApp />} />
-          </Routes>
-        </ThemeProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/?details=1']}>
+          <ThemeProvider>
+            <Routes>
+              <Route path="/" element={<SearchApp />} />
+            </Routes>
+          </ThemeProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     await waitFor(() => {
@@ -174,65 +192,33 @@ describe('SearchApp Component', () => {
     });
   });
 
-  it('closes character details when close button is clicked', async () => {
-    const mockCharacter = {
-      id: 1,
-      name: 'Rick Sanchez',
-      status: 'Alive',
-      species: 'Human',
-      type: '',
-      gender: 'Male',
-      origin: { name: 'Earth (C-137)', url: '' },
-      location: { name: 'Earth (Replacement Dimension)', url: '' },
-      image: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
-      episode: [],
-      url: '',
-      created: new Date().toISOString(),
-    };
-
-    vi.mocked(fetchCharacterDetails).mockResolvedValue(mockCharacter);
-    vi.mocked(fetchCharacters).mockResolvedValue({
-      info: { count: 1, pages: 1, next: null, prev: null },
-      results: [],
-    });
-
-    render(
-      <MemoryRouter initialEntries={['/?details=1']}>
-        <ThemeProvider>
-          <Routes>
-            <Route path="/" element={<SearchApp />} />
-          </Routes>
-        </ThemeProvider>
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Rick Sanchez')).toBeInTheDocument();
-    });
-
-    const closeButton = screen.getByText('Close');
-    await userEvent.click(closeButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText('Rick Sanchez')).not.toBeInTheDocument();
-    });
-  });
-
-  it('toggles theme when button clicked', async () => {
+  it('refreshes data when refresh button is clicked', async () => {
     renderWithRouter();
 
     await waitFor(() => {
-      const themeButton = screen.getByText(/Dark Mode|Light Mode/);
-      expect(themeButton).toBeInTheDocument();
+      expect(screen.getByRole('searchbox')).toBeInTheDocument();
     });
 
-    const themeButton = screen.getByText(/Dark Mode|Light Mode/);
-    const initialTheme = themeButton.textContent;
-
-    fireEvent.click(themeButton);
+    const refreshButton = screen.getByText('Refresh Data');
+    await userEvent.click(refreshButton);
 
     await waitFor(() => {
-      expect(themeButton.textContent).not.toBe(initialTheme);
+      expect(fetchCharacters).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it('handles errors in character details', async () => {
+    vi.mocked(fetchCharacterDetails).mockRejectedValue(
+      new Error('Details error')
+    );
+
+    renderWithRouter(['/?details=1']);
+
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Details error/)).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 });

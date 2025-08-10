@@ -19,7 +19,7 @@ describe('Card Component', () => {
   };
 
   it('renders card with correct props', () => {
-    render(<Card {...mockProps} />);
+    render(<Card id={0} detailsUrl={''} {...mockProps} />);
 
     expect(screen.getByAltText('Rick Sanchez')).toHaveAttribute(
       'src',
@@ -31,7 +31,7 @@ describe('Card Component', () => {
   });
 
   it('renders default values when props are empty', () => {
-    render(<Card {...emptyProps} />);
+    render(<Card id={0} detailsUrl={''} {...emptyProps} />);
 
     const img = screen.getByRole('img');
     expect(img).toHaveAttribute('src', ReactLogo);

@@ -13,10 +13,6 @@ export const Results = ({
   onCharacterClick,
 }: ResultsProps) => {
   if (error) {
-    if (error.includes('Critical API error')) {
-      throw new Error(error);
-    }
-
     return (
       <div style={{ color: 'red', padding: '20px' }}>
         <p>API Error: {error}</p>
