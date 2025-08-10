@@ -11,7 +11,7 @@ export const Results = ({
   totalPages,
   onPageChange,
   onCharacterClick,
-}: ResultsProps) => {
+}: ResultsProps & { isCached?: boolean }) => {
   if (error) {
     return (
       <div style={{ color: 'red', padding: '20px' }}>

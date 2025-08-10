@@ -19,6 +19,7 @@
   overflow-y: auto;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   scrollbar-width: thin;
+  margin-bottom: 20px;
 }
 
 .card {
@@ -39,4 +40,15 @@
 
 .gender {
   font-size: 0.7rem;
+}
+
+.cacheIndicator {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #096dd9;
+  font-size: 0.9rem;
 }
