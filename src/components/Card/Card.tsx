@@ -39,6 +39,7 @@ export const Card = ({
         onChange={() => {}}
         onClick={handleCheckboxChange}
         className={styles.checkbox}
+        data-testid={`checkbox-${id}`}
       />
       <img
         className={styles.image}
