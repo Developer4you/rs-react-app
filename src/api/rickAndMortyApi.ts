@@ -15,7 +15,7 @@ export const fetchCharacters = async (
     const response = await fetch(url);
 
     if (!response.ok) {
-      if (response.status !== 200) {
+      if (response.status === 404) {
         return {
           info: { count: 0, pages: 0, next: null, prev: null },
           results: [],

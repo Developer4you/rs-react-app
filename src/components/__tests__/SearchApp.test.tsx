@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SearchApp } from '../../components/SearchApp/SearchApp';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
@@ -9,6 +9,7 @@ import {
 } from '../../api/rickAndMortyApi';
 import { vi, describe, beforeEach, it, expect } from 'vitest';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
+import { ThemeProvider } from '../../context/ThemeContext';
 
 vi.mock('../../api/rickAndMortyApi', () => ({
   fetchCharacters: vi.fn(),
@@ -51,16 +52,18 @@ describe('SearchApp Component', () => {
   const renderWithRouter = () => {
     return render(
       <MemoryRouter initialEntries={['/']}>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <ErrorBoundary>
-                <SearchApp />
-              </ErrorBoundary>
-            }
-          />
-        </Routes>
+        <ThemeProvider>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <ErrorBoundary>
+                  <SearchApp />
+                </ErrorBoundary>
+              }
+            />
+          </Routes>
+        </ThemeProvider>
       </MemoryRouter>
     );
   };
@@ -158,9 +161,11 @@ describe('SearchApp Component', () => {
 
     render(
       <MemoryRouter initialEntries={['/?details=1']}>
-        <Routes>
-          <Route path="/" element={<SearchApp />} />
-        </Routes>
+        <ThemeProvider>
+          <Routes>
+            <Route path="/" element={<SearchApp />} />
+          </Routes>
+        </ThemeProvider>
       </MemoryRouter>
     );
 
@@ -193,9 +198,11 @@ describe('SearchApp Component', () => {
 
     render(
       <MemoryRouter initialEntries={['/?details=1']}>
-        <Routes>
-          <Route path="/" element={<SearchApp />} />
-        </Routes>
+        <ThemeProvider>
+          <Routes>
+            <Route path="/" element={<SearchApp />} />
+          </Routes>
+        </ThemeProvider>
       </MemoryRouter>
     );
 
@@ -208,6 +215,24 @@ describe('SearchApp Component', () => {
 
     await waitFor(() => {
       expect(screen.queryByText('Rick Sanchez')).not.toBeInTheDocument();
+    });
+  });
+
+  it('toggles theme when button clicked', async () => {
+    renderWithRouter();
+
+    await waitFor(() => {
+      const themeButton = screen.getByText(/Dark Mode|Light Mode/);
+      expect(themeButton).toBeInTheDocument();
+    });
+
+    const themeButton = screen.getByText(/Dark Mode|Light Mode/);
+    const initialTheme = themeButton.textContent;
+
+    fireEvent.click(themeButton);
+
+    await waitFor(() => {
+      expect(themeButton.textContent).not.toBe(initialTheme);
     });
   });
 });

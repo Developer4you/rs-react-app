@@ -1,8 +1,9 @@
 .results {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
   width: 100%;
   flex: 1;
-  border: 1px solid #1e3a8a;
-  background-color: #0a1f44;
   border-radius: 8px;
 }
 
@@ -14,6 +15,10 @@
 .cardsBox {
   display: flex;
   flex-wrap: wrap;
+  max-height: 490px;
+  overflow-y: auto;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
 }
 
 .card {

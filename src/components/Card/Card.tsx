@@ -1,16 +1,45 @@
 import styles from './card.module.css';
 import ReactLogo from '../../assets/react.svg';
+import { useState, useEffect } from 'react';
+import { useSelectedItemsStore } from '../../store/selectedItemsStore';
+import type { CardProps } from '../../interfaces/interfaces';
 
-type CardProps = {
-  image: string;
-  name: string;
-  locationName: string;
-  gender: string;
-};
+export const Card = ({
+  id,
+  image,
+  name,
+  locationName,
+  gender,
+  detailsUrl,
+}: CardProps) => {
+  const { selectedItems, toggleItem } = useSelectedItemsStore();
+  const [isChecked, setIsChecked] = useState(false);
 
-export const Card = ({ image, name, locationName, gender }: CardProps) => {
+  useEffect(() => {
+    setIsChecked(selectedItems.some((item) => item.id === id));
+  }, [selectedItems, id]);
+
+  const handleCheckboxChange = (e: React.MouseEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    toggleItem({
+      id,
+      name,
+      locationName,
+      gender,
+      image,
+      detailsUrl,
+    });
+  };
+
   return (
     <div className={styles.card}>
+      <input
+        type="checkbox"
+        checked={isChecked}
+        onChange={() => {}}
+        onClick={handleCheckboxChange}
+        className={styles.checkbox}
+      />
       <img
         className={styles.image}
         src={image ? image : ReactLogo}

@@ -1,4 +1,7 @@
 .card {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-radius: 10px;
   display: flex;
   width: 15vw;
   margin: 10px;
@@ -26,4 +29,11 @@
 
 .gender {
   font-size: 0.7rem;
+}
+
+.checkbox {
+  margin-right: 10px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }

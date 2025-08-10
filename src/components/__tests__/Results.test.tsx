@@ -197,4 +197,26 @@ describe('Results Component', () => {
     fireEvent.click(screen.getByText('Rick Sanchez'));
     expect(mockOnCharacterClick).toHaveBeenCalledWith(1);
   });
+
+  it('throws error for critical API errors', () => {
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    expect(() =>
+      render(
+        <Results
+          items={[]}
+          loading={false}
+          error="Critical API error"
+          page={1}
+          totalPages={1}
+          onPageChange={vi.fn()}
+          onCharacterClick={vi.fn()}
+        />
+      )
+    ).toThrow('Critical API error');
+
+    consoleError.mockRestore();
+  });
 });

@@ -12,6 +12,8 @@ import type { ApiResponse, Character } from '../../interfaces/interfaces';
 import { Controls } from '../controls/Controls';
 import { Results } from '../results/Results';
 import { Spinner } from '../Spinner/Spinner';
+import { Flyout } from '../Flyout/Flyout';
+import { useTheme } from '../../context/useTheme';
 
 export const SearchApp = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,6 +26,7 @@ export const SearchApp = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null
   );
+  const { theme, toggleTheme } = useTheme();
 
   const searchQuery = searchParams.get('search') || getSavedSearchQuery();
   const pageParam = searchParams.get('page');
@@ -100,13 +103,16 @@ export const SearchApp = () => {
         <Link to="/about" className={styles.navLink}>
           About application
         </Link>
+        <button onClick={toggleTheme} className={styles.themeToggle}>
+          {theme === 'light' ? '🌙 Dark' : '☀️ Light'} Mode
+        </button>
       </div>
       <Controls
         onSearch={handleSearch}
         loading={loading}
         initialValue={searchQuery}
       />
-      <div style={{ display: 'flex', border: '1px solid red' }}>
+      <div style={{ display: 'flex' }}>
         <div style={{ flex: 1 }}>
           <Results
             items={results}
@@ -132,6 +138,7 @@ export const SearchApp = () => {
         )}
       </div>
       <Outlet />
+      <Flyout />
     </div>
   );
 };

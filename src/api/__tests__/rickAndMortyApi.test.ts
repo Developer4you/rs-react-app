@@ -203,4 +203,18 @@ describe('rickAndMortyApi', () => {
       });
     });
   });
+
+  it('should throw error for non-200, non-404 status', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      headers: mockHeaders,
+      json: () => Promise.resolve({ error: 'Server error' }),
+    } as Response);
+
+    await expect(fetchCharacters(1)).rejects.toThrow('HTTP error! status: 500');
+    vi.restoreAllMocks();
+  });
 });

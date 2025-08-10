@@ -1,8 +1,9 @@
 .details {
-  background-color: #0a1f44;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   padding: 20px;
   border-radius: 8px;
-  border: 1px solid #1e3a8a;
 }
 
 .details img {
